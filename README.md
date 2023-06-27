@@ -11,3 +11,5 @@ optional arguments:
   -r RANGES   range (Ex: 0-1000); Default: 0-1000
   -t TYPE_    type of scan (taxonomy or node)
 ```
+
+![alt tag](https://github.com/c0dejump/DN/blob/main/static/dn.png)
