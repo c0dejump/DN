@@ -8,27 +8,41 @@ import argparse
 
 requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
 
+url_found = []
+
+len_url_found = []
+
+WARNING_METHOD = ["PATCH", "DELETE", "PUT"]
 
 
-def node_actions(url, type_, s, ranges):
-    actions = ["revisions"]
+def check_allow_methods(uri):
+    #print("\033[35m --\u251c Methods check \033[0m")
+    req = requests.options(uri, verify=False)
+    if "allow" in req.headers:
+        for wm in WARNING_METHOD:
+            if wm in req.headers["allow"]:
+                print("\033[31m\u251c ! the {} method seems to be authorized, it can be dangerous !\033[0m".format(wm))
+
+
+def node_actions(url, type_, s):
+    actions = ["revisions", "?_format=hal_json", "options"]
+    print("\033[35m\u251c Check node actions \033[0m")
     for a in actions:
-        print("\033[35m\u251c Check node actions \033[0m")
-        if ranges:
-            range_1 = ranges.split("-")[0]
-            range_2 = ranges.split("-")[1]
-        else:
-            range_1 = 0
-            range_2 = 1000
-        for i in range(int(range_1),int(range_2)):
-            uri = "{}{}{}/{}".format(url, type_, i, a)
-            req = s.get(uri, verify=False)
-            if req.status_code not in [404, 403] and len(req.content) != 174921 and "denied" not in req.text:
-                tree = fromstring(req.content)
-                title = tree.findtext('.//title')
-                print("\033[32m{}\033[0m - [{}b] - {} :: \033[34m{}\033[0m".format(req.status_code, len(req.content), uri, title))
-            sys.stdout.write(" {} \r".format(uri))
-            sys.stdout.write("\033[K")
+        if a == "options":
+            for uf in url_found:
+                check_allow_methods(uf)
+        else:    
+            for uf in url_found:
+                uri = "{}/{}".format(uf, a) if not "?" in a else "{}{}".format(uf, a)
+                req = s.get(uri, verify=False)
+                if req.status_code not in [404, 403, 406] and len(req.content) != 174921 and "denied" not in req.text and len(req.content) not in len_url_found:
+                    len_url_found.append(len(req.content))
+
+                    tree = fromstring(req.content)
+                    title = tree.findtext('.//title')
+                    print("\033[32m{}\033[0m - [{}b] - {} :: \033[34m{}\033[0m".format(req.status_code, len(req.content), uri, title))
+                sys.stdout.write(" {} \r".format(uri))
+                sys.stdout.write("\033[K")
 
 
 def main(url, type_, s, ranges):
@@ -39,17 +53,23 @@ def main(url, type_, s, ranges):
         range_2 = ranges.split("-")[1]
     else:
         range_1 = 0
-        range_2 = 1000
+        range_2 = 50
     for i in range(int(range_1),int(range_2)):
         uri = "{}{}{}".format(url, type_, i)
         req = s.get(uri, verify=False)
-        if req.status_code not in [404] and len(req.content) != 174921:
-            tree = fromstring(req.content)
-            title = tree.findtext('.//title')
+        if req.status_code not in [404] and len(req.content) != 174921 and len(req.content) not in len_url_found:
+            url_found.append(uri)
+            len_url_found.append(len(req.content))
+
+            if len(req.content) != 0:
+                tree = fromstring(req.content)
+                title = tree.findtext('.//title')
+            else:
+                title = "None"
             print("\033[32m{}\033[0m - [{}b] - {} :: \033[34m{}\033[0m".format(req.status_code, len(req.content), uri, title))
         sys.stdout.write(" {} \r".format(uri))
         sys.stdout.write("\033[K")
-    node_actions(url, type_, s, ranges)
+    node_actions(url, type_, s)
 
 
 if __name__ == '__main__':

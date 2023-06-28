@@ -1,6 +1,8 @@
 # DN
 Drupal Node checker
 
+
+## Usage
 ```
 > $ python3 drupal_node.py -u https://www.groupe-pomona.fr/ -h                                         
 usage: drupal_node.py [-h] [-u URL] [-r RANGES] [-t TYPE_]
@@ -13,3 +15,12 @@ optional arguments:
 ```
 
 ![alt tag](https://github.com/c0dejump/DN/blob/main/static/dn.png)
+
+
+## Features
+
+- Check node by ranges
+- Check:
+  - node/x/revisions
+  - node?_format=hal_json
+  - If PATCH/DELETE method are authorized on node
