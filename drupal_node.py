@@ -21,7 +21,7 @@ def check_allow_methods(uri):
     if "allow" in req.headers:
         for wm in WARNING_METHOD:
             if wm in req.headers["allow"]:
-                print("\033[31m\u251c ! the {} method seems to be authorized, it can be dangerous !\033[0m".format(wm))
+                print("\033[31m -\u251c The {} method for {} seems to be authorized !\033[0m".format(wm, uri))
 
 
 def node_actions(url, type_, s):

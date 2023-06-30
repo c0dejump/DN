@@ -23,4 +23,4 @@ optional arguments:
 - Check:
   - node/x/revisions
   - node?_format=hal_json
-  - If PATCH/DELETE method are authorized on node
+  - If PATCH/DELETE/PUT method are authorized on node
